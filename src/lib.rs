@@ -1,6 +1,13 @@
 use core::fmt;
 
-#[derive(PartialEq, Eq, Clone, Copy, Hash)]
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(
+    feature = "serde",
+    derive(PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)
+)]
+#[cfg_attr(not(feature = "serde"), derive(PartialEq, Eq, Clone, Copy, Hash))]
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
 pub struct u24([u8; 3]);
@@ -80,21 +87,6 @@ impl fmt::Display for u24 {
 impl fmt::Debug for u24 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.to_u32())
-    }
-}
-
-#[cfg(feature = "serde")]
-impl serde::Serialize for u24 {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_bytes(&self.0)
-    }
-}
-
-#[cfg(feature = "serde")]
-impl<'de> serde::Deserialize<'de> for u24 {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let bytes = <[u8; 3]>::deserialize(deserializer)?;
-        Ok(u24(bytes))
     }
 }
 
